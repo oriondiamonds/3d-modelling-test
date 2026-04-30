@@ -2,21 +2,23 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, useGLTF } from "@react-three/drei";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { MetalPreset, StonePreset } from "./presets";
 
+const STONE_KEYWORDS = [
+  "diamond", "stone", "crystal", "brilliant",
+  "sapphire", "ruby", "emerald", "melee",
+];
+
 function Model({ url, metal, stone }: { url: string; metal: MetalPreset; stone: StonePreset }) {
   const { scene } = useGLTF(url);
+  const ref = useRef<THREE.Group>(null);
 
   useEffect(() => {
-    const STONE_KEYWORDS = [
-      "diamond", "stone", "gem", "crystal", "jewel",
-      "facet", "brilliant", "pave", "melee",
-      "glass", "transparent",
-    ];
+    const root = scene.clone();
 
-    scene.traverse((node: THREE.Object3D) => {
+    root.traverse((node) => {
       if (!(node instanceof THREE.Mesh)) return;
 
       const nodeName = node.name.toLowerCase();
@@ -57,9 +59,24 @@ function Model({ url, metal, stone }: { url: string; metal: MetalPreset; stone: 
       node.castShadow = true;
       node.receiveShadow = true;
     });
+
+    // Box3 auto-scale + center (same approach as GlbViewer — proven to work)
+    const box = new THREE.Box3().setFromObject(root);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const scale = 1.5 / Math.max(size.x, size.y, size.z);
+    root.scale.setScalar(scale);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    root.position.sub(center.multiplyScalar(scale));
+
+    if (ref.current) {
+      ref.current.clear();
+      ref.current.add(root);
+    }
   }, [scene, metal, stone]);
 
-  return <primitive object={scene} />;
+  return <group ref={ref} />;
 }
 
 interface Props {
@@ -88,7 +105,7 @@ export default function JewelryViewer({ modelUrl, metal, stone }: Props) {
         <Environment preset="apartment" background={false} />
         <ContactShadows opacity={0.4} blur={2} position={[0, -1.5, 0]} />
       </Suspense>
-      <OrbitControls autoRotate autoRotateSpeed={1} enableZoom enablePan={false} />
+      <OrbitControls enableZoom enablePan={false} />
     </Canvas>
   );
 }
