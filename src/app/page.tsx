@@ -48,9 +48,10 @@ export default function Page() {
     }}>
 
          {/* Rhino link */}
-      <Link href="/stl" style={{ fontSize: 12, color: "#999" }}>
-        → Open STL viewer
-      </Link>
+      <div style={{ display: "flex", gap: 16 }}>
+        <Link href="/stl" style={{ fontSize: 12, color: "#999" }}>→ STL viewer</Link>
+        <Link href="/compare" style={{ fontSize: 12, color: "#999" }}>→ Compare (original glb.jsx)</Link>
+      </div>
 
       {/* GLB input */}
       <div style={{ display: "flex", gap: 8 }}>
