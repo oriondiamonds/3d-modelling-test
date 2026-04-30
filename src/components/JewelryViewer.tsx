@@ -10,7 +10,11 @@ function Model({ url, metal, stone }: { url: string; metal: MetalPreset; stone: 
   const { scene } = useGLTF(url);
 
   useEffect(() => {
-    const STONE_KEYWORDS = ["diamond", "stone", "gem", "crystal", "jewel"];
+    const STONE_KEYWORDS = [
+      "diamond", "stone", "gem", "crystal", "jewel",
+      "facet", "brilliant", "pave", "melee",
+      "glass", "transparent",
+    ];
 
     scene.traverse((node) => {
       if (!(node instanceof THREE.Mesh)) return;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { METAL_PRESETS, STONE_PRESETS, type MetalPreset, type StonePreset } from "@/components/presets";
 
 const JewelryViewer = dynamic(() => import("@/components/JewelryViewer"), { ssr: false });
@@ -27,6 +28,12 @@ function Swatch({ color, label, selected, onClick }: {
   );
 }
 
+function encodePath(raw: string) {
+  const parts = raw.trim().split("/");
+  const filename = parts.pop() ?? "";
+  return [...parts, encodeURIComponent(filename)].join("/");
+}
+
 export default function Page() {
   const [modelUrl, setModelUrl] = useState(DEFAULT_URL);
   const [input, setInput] = useState(DEFAULT_URL);
@@ -40,6 +47,11 @@ export default function Page() {
       justifyContent: "center", padding: 24, gap: 16,
     }}>
 
+         {/* Rhino link */}
+      <Link href="/stl" style={{ fontSize: 12, color: "#999" }}>
+        → Open STL viewer
+      </Link>
+
       {/* GLB input */}
       <div style={{ display: "flex", gap: 8 }}>
         <input
@@ -50,11 +62,11 @@ export default function Page() {
           }}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && setModelUrl(input.trim())}
+          onKeyDown={(e) => e.key === "Enter" && setModelUrl(encodePath(input))}
           placeholder="GLB path or URL…"
         />
         <button
-          onClick={() => setModelUrl(input.trim())}
+          onClick={() => setModelUrl(encodePath(input))}
           style={{
             padding: "8px 16px", borderRadius: 8, border: "none",
             background: "#e0b84e", color: "#000", fontSize: 13,
@@ -64,6 +76,7 @@ export default function Page() {
           Load
         </button>
       </div>
+   
 
       {/* Viewer card */}
       <div style={{
@@ -73,6 +86,8 @@ export default function Page() {
       }}>
         <JewelryViewer modelUrl={modelUrl} metal={metal} stone={stone} />
       </div>
+
+      
 
       {/* Swatches */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
